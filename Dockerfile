@@ -1,19 +1,22 @@
 FROM centos
-LABEL maintainer="roisthomas088@gmail.com"
+LABEL maintainer="vikash@gmail.com"
 
 # Update yum repositories and install dependencies
 RUN cd /etc/yum.repos.d/ && \
     sed -i 's/mirrorlist/#mirrorlist/g' CentOS-* && \
     sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' CentOS-* && \
-    yum -y install java httpd zip unzip
+    yum -y install java httpd zip unzip && \
+    yum clean all
 
-# Add the template and unzip it
-ADD https://www.free-css.com/assets/files/free-css-templates/download/page254/photogenic.zip /var/www/html/
+# Download photogenic.zip using wget
+RUN cd /var/www/html/ && \
+    wget -q https://www.free-css.com/assets/files/free-css-templates/download/page254/photogenic.zip && \
+    unzip -q photogenic.zip && \
+    rm -f photogenic.zip
+
+# Set working directory and expose port
 WORKDIR /var/www/html/
-RUN unzip -q photogenic.zip && \
-    cp -rvf photogenic/* . && \
-    rm -rf photogenic photogenic.zip
+EXPOSE 80
 
-# Expose port 80 and start Apache HTTP Server
-EXPOSE 80 22
+# Start Apache HTTP Server
 CMD ["/usr/sbin/httpd", "-D", "FOREGROUND"]
